@@ -1,15 +1,14 @@
 {
   "name": "telegram-whatsapp-pairbot",
   "version": "1.0.0",
-  "description": "بوت تيليجرام لتوليد رمز واتساب وربط جلسة تلقائيًا",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "@hapi/boom": "^10.0.0",
-    "@whiskeysockets/baileys": "^6.7.2",
-    "axios": "^1.6.0",
-    "node-telegram-bot-api": "^0.61.0"
+    "@whiskeysockets/baileys": "^6.6.0",
+    "axios": "^1.6.8",
+    "node-telegram-bot-api": "^0.61.0",
+    "pino": "^8.0.0"
   }
 }
