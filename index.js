@@ -1,28 +1,37 @@
-// ملف: index.js const TelegramBot = require('node-telegram-bot-api'); const axios = require('axios');
+const TelegramBot = require('node-telegram-bot-api');
+const axios = require('axios');
 
-// توكن بوت تيليجرام الخاص بك const token = '7277157537:AAFNn75vKddw_zuZo1ljJ0r5SASyuheJRCs'; const bot = new TelegramBot(token, { polling: true });
+// ✅ ضع هنا توكن البوت الخاص بك من BotFather
+const token = '7277157537:AAFNn75vKddw_zuZo1ljJ0r5SASyuheJRCs';
 
-bot.onText(//start/, (msg) => { bot.sendMessage(msg.chat.id, `👋 مرحبًا بك في بوت طرزان الواقدي!
+const bot = new TelegramBot(token, { polling: true });
 
-أرسل رقم واتساب مع رمز الدولة للحصول على رمز الاقتران. مثال: 9665XXXXXXXX`, { parse_mode: 'Markdown' }); });
+bot.on('message', async (msg) => {
+  const chatId = msg.chat.id;
+  const text = msg.text?.trim();
 
-bot.on('message', async (msg) => { const chatId = msg.chat.id; const text = msg.text.trim();
+  // تحقق من صحة الرقم
+  if (!text || !/^\d{7,15}$/.test(text)) {
+    return bot.sendMessage(chatId, `📲 *أرسل رقم واتساب مع رمز الدولة للحصول على رمز الاقتران*\n\nمثال: \`9665XXXXXXXX\``, {
+      parse_mode: 'Markdown'
+    });
+  }
 
-if (text.startsWith('/')) return; // تجاهل الأوامر
+  await bot.sendMessage(chatId, '⏳ جارٍ التحقق من الرقم وجلب رمز الاقتران...');
 
-const number = text.replace(/\D/g, '');
+  try {
+    const response = await axios.get(`https://knight-bot-paircode.onrender.com/code?number=${text}`);
+    const code = response.data?.code;
 
-if (number.length < 8 || number.length > 15) { return bot.sendMessage(chatId, '❌ رقم غير صحيح. يرجى إرسال رقم واتساب مع رمز الدولة.'); }
+    if (!code || code === 'Service Unavailable') {
+      return bot.sendMessage(chatId, '❌ الخدمة غير متوفرة الآن. حاول لاحقًا.');
+    }
 
-bot.sendMessage(chatId, ⏳ جاري طلب رمز الاقتران للرقم: +${number});
-
-try { const response = await axios.get(https://knight-bot-paircode.onrender.com/code?number=${number}); const code = response.data.code;
-
-if (!code || code === "Service Unavailable") {
-  return bot.sendMessage(chatId, '❌ الخدمة غير متوفرة حاليًا. حاول لاحقًا.');
-}
-
-bot.sendMessage(chatId, `✅ رمز الاقتران الخاص بك:
-
-```${code}````, { parse_mode: 'Markdown' }); } catch (err) { console.error(err); bot.sendMessage(chatId, '🚫 حدث خطأ أثناء جلب رمز الاقتران. حاول لاحقًا.'); } });
-
+    await bot.sendMessage(chatId, `✅ *رمز الاقتران الخاص بك:*\n\n\`${code}\``, {
+      parse_mode: 'Markdown'
+    });
+  } catch (err) {
+    console.error('خطأ في الاتصال بالـ API:', err.message);
+    bot.sendMessage(chatId, '⚠️ حدث خطأ أثناء جلب الرمز. حاول مرة أخرى لاحقًا.');
+  }
+});
